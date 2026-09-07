@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/tiktok_live_monitor
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=tiktok_live_monitor
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/2-seed.sql
+
+volumes:
+  db_data:
